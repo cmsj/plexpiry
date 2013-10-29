@@ -155,7 +155,7 @@ class Plexpiry:
             data = self.get_tv_episode(episode.attrib['ratingKey'])
             episodes[episode.attrib['ratingKey']] = \
                 self.trim_dict(data, ['title', 'ratingKey', 'viewCount',
-                                      'lastViewedAt'])
+                                      'lastViewedAt', 'addedAt'])
         return episodes
 
     def get_tv_episode(self, episode_id):
@@ -211,6 +211,40 @@ class Plexpiry:
                                                  "episode": episode})
 
         return watched_episodes
+
+    def get_unwatched_tv_episodes(self, max_age):
+        """Get TV episodes that have not been watched, and were added more than
+        'max_age' seconds ago"""
+        unwatched_episodes = []
+
+        shows = self.get_tv_tree()
+
+        for show_id in shows:
+            show = shows[show_id]
+            for season_id in shows[show_id]['seasons']:
+                season = shows[show_id]['seasons'][season_id]
+                for episode_id in season['episodes']:
+                    episode = season['episodes'][episode_id]
+                    msg = "Inspecting %s:%s:%s: " % (show["title"],
+                                                     season["title"],
+                                                     episode["title"])
+
+                    if "lastViewedAt" in episode:
+                        self.dbg("%s Skipping. Watched" % msg)
+                        continue
+
+                    age = int(time.time()) - int(episode["addedAt"])
+
+                    if age < max_age:
+                        self.dbg("%s Skipping. Not old enough" % msg)
+                        continue
+                    else:
+                        self.dbg("%s Expiring." % msg)
+                        unwatched_episodes.append({"show": show["title"],
+                                                   "season": season["title"],
+                                                   "episode": episode})
+
+        return unwatched_episodes
 
     def delete(self, media_id):
         """Delete a specific piece of media"""
