@@ -95,18 +95,22 @@ class Plexpiry:
         """Return a number of seconds, based on the input
         which can end with d/w/y for days/weeks/years.
         """
+        parsed_time = -1
         try:
-            return int(time)
+            parsed_time = int(time)
         except ValueError:
             period = time[-1:]
             if period in ['d', 'D']:
-                return int(time[:-1]) * 86400
+                parsed_time = int(time[:-1]) * 86400
             elif period in ['w', 'W']:
-                return int(time[:-1]) * 86400 * 7
+                parsed_time = int(time[:-1]) * 86400 * 7
             elif period in ['y', 'Y']:
-                return int(time[:-1]) * 86400 * 365
-            else:
-                raise ValueError("Unable to parse: %s" % time)
+                parsed_time = int(time[:-1]) * 86400 * 365
+
+        if parsed_time >= 0:
+            return parsed_time
+        else:
+            raise ValueError("Unable to parse: %s" % time)
 
     def fetch_tree(self, url):
         """Fetch the XML tree for a url."""
@@ -198,90 +202,67 @@ class Plexpiry:
                                       'lastViewedAt', 'addedAt'])
         return movies
 
-    def get_watched_tv_episodes(self, max_age):
-        """Get TV episodes that were watched more than 'max_age' seconds ago.
-        """
-        watched_episodes = []
-
+    def find_expired_tv(self, max_age, expiry_type):
+        """Find TV episodes that have expired."""
+        to_expire = []
         shows = self.get_tv_tree()
 
         for show_id in shows:
             show = shows[show_id]
-            for season_id in shows[show_id]['seasons']:
-                season = shows[show_id]['seasons'][season_id]
+            for season_id in show['seasons']:
+                season = show['seasons'][season_id]
                 for episode_id in season['episodes']:
                     episode = season['episodes'][episode_id]
                     msg = "Inspecting %s:%s:%s: " % (show["title"],
                                                      season["title"],
                                                      episode["title"])
-
-                    if "lastViewedAt" not in episode:
-                        self.dbg("%s Skipping. Not watched" % msg)
-                        continue
-
-                    age = int(time.time()) - int(episode["lastViewedAt"])
-
-                    if age < max_age:
-                        self.dbg("%s Skipping. Not old enough" % msg)
-                        continue
-                    else:
+                    if self.should_expire_tv_episode(episode, max_age,
+                                                     expiry_type):
                         self.dbg("%s Expiring." % msg)
-                        watched_episodes.append({"show": show["title"],
-                                                 "season": season["title"],
-                                                 "episode": episode})
+                        to_expire.append({"show": show["title"],
+                                          "season": season["title"],
+                                          "episode": episode})
+                    else:
+                        self.dbg("%s Skipping." % msg)
+        return to_expire
 
-        return watched_episodes
-
-    def get_unwatched_tv_episodes(self, max_age):
-        """Get TV episodes that have not been watched, and were added more than
-        'max_age' seconds ago.
+    def should_expire_tv_episode(self, episode, max_age, expiry_type):
+        """Determine if a TV episode is expired, either for having been
+        watched more than max_age seconds ago, or not having been watched
+        after max_age seconds.
         """
-        unwatched_episodes = []
+        time_now = int(time.time())
+        age = 0
 
-        shows = self.get_tv_tree()
+        if expiry_type == "watched":
+            if "lastViewedAt" in episode:
+                age = time_now - int(episode["lastViewedAt"])
+        elif expiry_type == "unwatched":
+            if "lastViewedAt" not in episode:
+                age = time_now - int(episode["addedAt"])
 
-        for show_id in shows:
-            show = shows[show_id]
-            for season_id in shows[show_id]['seasons']:
-                season = shows[show_id]['seasons'][season_id]
-                for episode_id in season['episodes']:
-                    episode = season['episodes'][episode_id]
-                    msg = "Inspecting %s:%s:%s: " % (show["title"],
-                                                     season["title"],
-                                                     episode["title"])
+        if age > max_age:
+            return True
 
-                    if "lastViewedAt" in episode:
-                        self.dbg("%s Skipping. Watched" % msg)
-                        continue
-
-                    age = int(time.time()) - int(episode["addedAt"])
-
-                    if age < max_age:
-                        self.dbg("%s Skipping. Not old enough" % msg)
-                        continue
-                    else:
-                        self.dbg("%s Expiring." % msg)
-                        unwatched_episodes.append({"show": show["title"],
-                                                   "season": season["title"],
-                                                   "episode": episode})
-
-        return unwatched_episodes
+        return False
 
     def should_expire_movie(self, movie, max_age, expiry_type):
         """Decide whether to expire a movie based on its age and whether it's
         watched or not.
         """
         time_now = int(time.time())
+        age = 0
+
         if expiry_type == "watched":
             if "lastViewedAt" in movie:
                 age = time_now - int(movie["lastViewedAt"])
-                if age > max_age:
-                    return True
         elif expiry_type == "unwatched":
             if "lastViewedAt" not in movie:
                 age = time_now - int(movie["addedAt"])
-                if age > max_age:
-                    return True
+
+        if age > max_age:
+            return True
+
         return False
 
     def find_expired_movies(self, max_age, expiry_type):

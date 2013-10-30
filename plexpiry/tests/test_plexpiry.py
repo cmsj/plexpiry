@@ -28,7 +28,7 @@ class TestPlexpiry(testtools.TestCase):
         self.useFixture(fixtures.MonkeyPatch('sys.stdout', self.stdout))
         stderr = self.useFixture(fixtures.StringStream('stderr')).stream
         self.useFixture(fixtures.MonkeyPatch('sys.stderr', stderr))
-        self.logger = self.useFixture(fixtures.FakeLogger(name="plexpire"))
+        self.logger = self.useFixture(fixtures.FakeLogger(name="plexpiry"))
         self.addCleanup(self.cleanUp)
 
         self.options = FakeOptions()
@@ -79,3 +79,6 @@ class TestPlexpiry(testtools.TestCase):
 
     def test_parse_time_bogus(self):
         self.assertRaises(ValueError, self.plexpiry.parse_time, 'bogus')
+
+    def test_parse_time_negative(self):
+        self.assertRaises(ValueError, self.plexpiry.parse_time, '-1')
