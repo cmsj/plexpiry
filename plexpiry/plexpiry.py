@@ -1,15 +1,15 @@
 #!/usr/bin/python
-"""Script to interface with Plex to find old media that can be deleted"""
+"""Script to interface with Plex to find old media that can be deleted."""
 
-from optparse import OptionParser, OptionGroup
 import sys
 import time
 import urllib2
 from xml.etree import ElementTree
+from optparse import OptionParser, OptionGroup
 
 
 def parse_options():
-    """Parse command line options"""
+    """Parse command line options."""
     usage = "Usage: %prog [options]"
     parser = OptionParser(usage)
     parser.add_option('-d', '--debug', action='store_true', dest='debug',
@@ -71,22 +71,21 @@ class Plexpiry:
     sections = None
 
     def __init__(self, options):
-        """Class initialiser"""
         self.options = options
         self.dbg(self.options)
         self.urlbase = "http://%s:%s" % (options.server, options.port)
 
     def dbg(self, message):
-        """Print a debugging statement"""
+        """Print a debugging statement."""
         if self.options.debug:
             print("DEBUG: %s" % message)
 
     def err(self, message):
-        """Print an error statement"""
+        """Print an error statement."""
         print("ERROR: %s" % message)
 
     def trim_dict(self, source_dict, keys):
-        """Return a filtered version of 'source_dict'"""
+        """Return a filtered version of 'source_dict'."""
         new_dict = {new_key: source_dict[new_key]
                     for new_key in keys if new_key in source_dict}
         self.dbg(str(new_dict))
@@ -94,7 +93,8 @@ class Plexpiry:
 
     def parse_time(self, time):
         """Return a number of seconds, based on the input
-        which can end with d/w/y for days/weeks/years"""
+        which can end with d/w/y for days/weeks/years.
+        """
         try:
             return int(time)
         except ValueError:
@@ -109,13 +109,12 @@ class Plexpiry:
                 raise ValueError("Unable to parse: %s" % time)
 
     def fetch_tree(self, url):
-        """Fetch the XML tree for a url"""
+        """Fetch the XML tree for a url."""
         self.dbg("Fetching: %s" % url)
-        page = urllib2.urlopen(url)
-        return ElementTree.parse(page)
+        return ElementTree.parse(urllib2.urlopen(url))
 
     def find_sections(self):
-        """Get the media sections"""
+        """Get the media sections."""
         self.sections = {}
         tree = self.fetch_tree("%s/library/sections" % self.urlbase)
         for section in tree.iter("Directory"):
@@ -124,7 +123,7 @@ class Plexpiry:
         self.dbg("Found sections: %s" % self.sections)
 
     def find_tv_shows(self):
-        """Get the TV shows"""
+        """Get the TV shows."""
         shows = {}
         tree = self.fetch_tree("%s/library/sections/%s/all" % (
                                self.urlbase, self.sections['show']['key']))
@@ -134,19 +133,19 @@ class Plexpiry:
         return shows
 
     def find_tv_seasons(self, show):
-        """Get the seasons for a TV show"""
+        """Get the seasons for a TV show."""
         seasons = {}
         tree = self.fetch_tree("%s/library/metadata/%s/children" % (
                                self.urlbase, show))
         for season in tree.iter("Directory"):
-            if not "ratingKey" in season.attrib:
+            if "ratingKey" not in season.attrib:
                 continue
             seasons[season.attrib['ratingKey']] = self.trim_dict(season.attrib,
                                                                  ['title'])
         return seasons
 
     def find_tv_episodes(self, show, season):
-        """Get the episodes for a season of a TV show"""
+        """Get the episodes for a season of a TV show."""
         episodes = {}
         tree = self.fetch_tree("%s/library/metadata/%s/children" % (
                                self.urlbase, season))
@@ -159,14 +158,14 @@ class Plexpiry:
         return episodes
 
     def get_tv_episode(self, episode_id):
-        """Get the metadata for a specific TV episode"""
+        """Get the metadata for a specific TV episode."""
         tree = self.fetch_tree("%s/library/metadata/%s" % (
                                self.urlbase, episode_id))
         episode = tree.find("Video")
         return episode.attrib
 
     def get_tv_tree(self):
-        """Build a full tree of shows, seasons and episodes"""
+        """Build a full tree of shows, seasons and episodes."""
         self.find_sections()
         shows = self.find_tv_shows()
 
@@ -180,18 +179,18 @@ class Plexpiry:
         return shows
 
     def get_movie(self, movie_id):
-        """Get the metadata for a specific movie"""
+        """Get the metadata for a specific movie."""
         tree = self.fetch_tree("%s/library/metadata/%s" % (
-                             self.urlbase, movie_id))
+                               self.urlbase, movie_id))
         movie = tree.find("Video")
         return movie.attrib
 
     def get_movie_tree(self):
-        """Build a full tree of movies"""
+        """Build a full tree of movies."""
         self.find_sections()
         movies = {}
         tree = self.fetch_tree("%s/library/sections/%s/all" % (
-                                   self.urlbase, self.sections['movie']['key']))
+                               self.urlbase, self.sections['movie']['key']))
         for movie in tree.iter("Video"):
             data = self.get_movie(movie.attrib['ratingKey'])
             movies[movie.attrib['ratingKey']] = \
@@ -200,7 +199,8 @@ class Plexpiry:
         return movies
 
     def get_watched_tv_episodes(self, max_age):
-        """Get TV episodes that were watched more than 'max_age' seconds ago"""
+        """Get TV episodes that were watched more than 'max_age' seconds ago.
+        """
         watched_episodes = []
 
         shows = self.get_tv_tree()
@@ -215,7 +215,7 @@ class Plexpiry:
                                                      season["title"],
                                                      episode["title"])
 
-                    if not "lastViewedAt" in episode:
+                    if "lastViewedAt" not in episode:
                         self.dbg("%s Skipping. Not watched" % msg)
                         continue
 
@@ -234,7 +234,8 @@ class Plexpiry:
 
     def get_unwatched_tv_episodes(self, max_age):
         """Get TV episodes that have not been watched, and were added more than
-        'max_age' seconds ago"""
+        'max_age' seconds ago.
+        """
         unwatched_episodes = []
 
         shows = self.get_tv_tree()
@@ -267,7 +268,7 @@ class Plexpiry:
         return unwatched_episodes
 
     def get_watched_movies(self, max_age):
-        """Get movies that have been watched ore than 'max_age' seconds ago"""
+        """Get movies that have been watched ore than 'max_age' seconds ago."""
         watched_movies = []
 
         movies = self.get_movie_tree()
@@ -276,7 +277,7 @@ class Plexpiry:
             movie = movies[movie_id]
             msg = "Inspecting %s" % movie["title"]
 
-            if not "lastViewedAt" in movie:
+            if "lastViewedAt" not in movie:
                 self.dbg("%s Skipping. Not watched" % msg)
                 continue
 
@@ -292,7 +293,7 @@ class Plexpiry:
         return watched_movies
 
     def delete(self, media_id):
-        """Delete a specific piece of media"""
+        """Delete a specific piece of media."""
         url = ("%s/library/metadata/%s" % (self.urlbase, media_id))
         self.dbg("Deleting: %s" % media_id)
         opener = urllib2.build_opener(urllib2.HTTPHandler)

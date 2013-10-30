@@ -26,6 +26,7 @@ pip-log.txt
 .coverage
 .tox
 nosetests.xml
+.testrepository
 
 # Translations
 *.mo
@@ -34,3 +35,7 @@ nosetests.xml
 .mr.developer.cfg
 .project
 .pydevproject
+
+# Generated Files
+AUTHORS
+ChangeLog
