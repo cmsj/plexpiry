@@ -39,3 +39,7 @@ nosetests.xml
 # Generated Files
 AUTHORS
 ChangeLog
+
+# Editors
+*~
+*.swp
