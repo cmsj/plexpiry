@@ -268,7 +268,9 @@ class Plexpiry:
         return unwatched_episodes
 
     def get_watched_movies(self, max_age):
-        """Get movies that have been watched ore than 'max_age' seconds ago."""
+        """Get movies that have been watched more than 'max_age' seconds
+        ago.
+        """
         watched_movies = []
 
         movies = self.get_movie_tree()
@@ -291,6 +293,33 @@ class Plexpiry:
                 watched_movies.append(movie)
 
         return watched_movies
+
+    def get_unwatched_movies(self, max_age):
+        """Get movies that have not been watched and were added more than
+        'max_age' seconds ago
+        """
+        unwatched_movies = []
+
+        movies = self.get_movie_tree()
+
+        for movie_id in movies:
+            movie = movies[movie_id]
+            msg = "Inspecting %s" % movie["title"]
+
+            if "lastViewedAt" in movie:
+                self.dbg("%s Skipping. Watched" % msg)
+                continue
+
+            age = int(time.time()) - int(movie["addedAt"])
+
+            if age < max_age:
+                self.dbg("%s Skipping. Not old enough" % msg)
+                continue
+            else:
+                self.dbg("%s Expiring." % msg)
+                unwatched_movies.append(movie)
+
+        return unwatched_movies
 
     def delete(self, media_id):
         """Delete a specific piece of media."""
