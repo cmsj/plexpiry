@@ -267,59 +267,39 @@ class Plexpiry:
 
         return unwatched_episodes
 
-    def get_watched_movies(self, max_age):
-        """Get movies that have been watched more than 'max_age' seconds
-        ago.
+    def should_expire_movie(self, movie, max_age, expiry_type):
+        """Decide whether to expire a movie based on its age and whether it's
+        watched or not.
         """
-        watched_movies = []
-
-        movies = self.get_movie_tree()
-
-        for movie_id in movies:
-            movie = movies[movie_id]
-            msg = "Inspecting %s" % movie["title"]
-
-            if "lastViewedAt" not in movie:
-                self.dbg("%s Skipping. Not watched" % msg)
-                continue
-
-            age = int(time.time()) - int(movie["lastViewedAt"])
-
-            if age < max_age:
-                self.dbg("%s Skipping. Not old enough" % msg)
-                continue
-            else:
-                self.dbg("%s Expiring. " % msg)
-                watched_movies.append(movie)
-
-        return watched_movies
-
-    def get_unwatched_movies(self, max_age):
-        """Get movies that have not been watched and were added more than
-        'max_age' seconds ago
-        """
-        unwatched_movies = []
-
-        movies = self.get_movie_tree()
-
-        for movie_id in movies:
-            movie = movies[movie_id]
-            msg = "Inspecting %s" % movie["title"]
-
+        time_now = int(time.time())
+        if expiry_type == "watched":
             if "lastViewedAt" in movie:
-                self.dbg("%s Skipping. Watched" % msg)
-                continue
+                age = time_now - int(movie["lastViewedAt"])
+                if age > max_age:
+                    return True
+        elif expiry_type == "unwatched":
+            if "lastViewedAt" not in movie:
+                age = time_now - int(movie["addedAt"])
+                if age > max_age:
+                    return True
+        return False
 
-            age = int(time.time()) - int(movie["addedAt"])
+    def find_expired_movies(self, max_age, expiry_type):
+        """Find movies and decide whether to expire them."""
+        to_expire = []
+        movies = self.get_movie_tree()
 
-            if age < max_age:
-                self.dbg("%s Skipping. Not old enough" % msg)
-                continue
-            else:
+        for movie_id in movies:
+            movie = movies[movie_id]
+            msg = "Inspecting %s" % movie["title"]
+
+            if self.should_expire_movie(movie, max_age, expiry_type):
                 self.dbg("%s Expiring." % msg)
-                unwatched_movies.append(movie)
+                to_expire.append(movie)
+            else:
+                self.dbg("%s Skipping." % msg)
 
-        return unwatched_movies
+        return to_expire
 
     def delete(self, media_id):
         """Delete a specific piece of media."""
@@ -356,14 +336,14 @@ def main():
 
     if options.watched_movies:
         time = plex.parse_time(options.watched_movies)
-        movies = plex.get_watched_movies(time)
+        movies = plex.find_expired_movies(time, "watched")
         for movie in movies:
             plex.dbg("Deleting: %s" % movie['title'])
             plex.delete(movie['ratingKey'])
 
     if options.unwatched_movies:
         time = plex.parse_time(options.unwatched_movies)
-        movies = plex.get_unwatched_movies(time)
+        movies = plex.find_expired_movies(time, "unwatched")
         for movie in movies:
             plex.dbg("Deleting: %s" % movie['title'])
             plex.delete(movie['ratingKey'])
