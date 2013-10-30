@@ -27,7 +27,7 @@ def parse_options():
                         "These options let you configure what kinds of media "
                         "you want to expire, and when. "
                         "Times default to seconds, but you can specify "
-                        "d, w, m, y suffixes for days/weeks/years "
+                        "d, w, y suffixes for days/weeks/years "
                         "respectively")
     group.add_option('--watched-tv', action='store',
                      dest='watched_tv', metavar='TIME',
@@ -179,6 +179,26 @@ class Plexpiry:
 
         return shows
 
+    def get_movie(self, movie_id):
+        """Get the metadata for a specific movie"""
+        tree = self.fetch_tree("%s/library/metadata/%s" % (
+                             self.urlbase, movie_id))
+        movie = tree.find("Video")
+        return movie.attrib
+
+    def get_movie_tree(self):
+        """Build a full tree of movies"""
+        self.find_sections()
+        movies = {}
+        tree = self.fetch_tree("%s/library/sections/%s/all" % (
+                                   self.urlbase, self.sections['movie']['key']))
+        for movie in tree.iter("Video"):
+            data = self.get_movie(movie.attrib['ratingKey'])
+            movies[movie.attrib['ratingKey']] = \
+                self.trim_dict(data, ['title', 'ratingKey', 'viewCount',
+                                      'lastViewedAt', 'addedAt'])
+        return movies
+
     def get_watched_tv_episodes(self, max_age):
         """Get TV episodes that were watched more than 'max_age' seconds ago"""
         watched_episodes = []
@@ -245,6 +265,31 @@ class Plexpiry:
                                                    "episode": episode})
 
         return unwatched_episodes
+
+    def get_watched_movies(self, max_age):
+        """Get movies that have been watched ore than 'max_age' seconds ago"""
+        watched_movies = []
+
+        movies = self.get_movie_tree()
+
+        for movie_id in movies:
+            movie = movies[movie_id]
+            msg = "Inspecting %s" % movie["title"]
+
+            if not "lastViewedAt" in movie:
+                self.dbg("%s Skipping. Not watched" % msg)
+                continue
+
+            age = int(time.time()) - int(movie["lastViewedAt"])
+
+            if age < max_age:
+                self.dbg("%s Skipping. Not old enough" % msg)
+                continue
+            else:
+                self.dbg("%s Expiring. " % msg)
+                watched_movies.append(movie)
+
+        return watched_movies
 
     def delete(self, media_id):
         """Delete a specific piece of media"""
