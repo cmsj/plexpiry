@@ -48,11 +48,11 @@ def parse_options():
                         "that you do not want to ever be expired."
                         "They can be specified multiple times.")
     group.add_option('--ignore-tv-show', action='append',
-                     dest='ignore_tv_shows', default='',
+                     dest='ignore_tv_shows',
                      metavar='SHOW',
                      help='a TV show to ignore')
     group.add_option('--ignore-movie', action='append',
-                     dest='ignore_movies', default='',
+                     dest='ignore_movies',
                      metavar='MOVIE',
                      help='a movie to ignore')
     parser.add_option_group(group)
@@ -209,6 +209,8 @@ class Plexpiry:
 
         for show_id in shows:
             show = shows[show_id]
+            if show["title"] in self.options.ignore_tv_shows:
+                continue
             for season_id in show['seasons']:
                 season = show['seasons'][season_id]
                 for episode_id in season['episodes']:
@@ -272,6 +274,8 @@ class Plexpiry:
 
         for movie_id in movies:
             movie = movies[movie_id]
+            if movie["title"] in self.options.ignore_movies:
+                continue
             msg = "Inspecting %s" % movie["title"]
 
             if self.should_expire_movie(movie, max_age, expiry_type):
@@ -299,7 +303,7 @@ def main():
 
     if options.watched_tv:
         time = plex.parse_time(options.watched_tv)
-        episodes = plex.get_watched_tv_episodes(time)
+        episodes = plex.find_expired_tv(time, "watched")
         for episode in episodes:
             plex.dbg("Deleting: %s:%s:%s" % (episode['show'],
                                              episode['season'],
@@ -308,7 +312,7 @@ def main():
 
     if options.unwatched_tv:
         time = plex.parse_time(options.unwatched_tv)
-        episodes = plex.get_unwatched_tv_episodes(time)
+        episodes = plex.find_expired_tv(time, "unwatched")
         for episode in episodes:
             plex.dbg("Deleting: %s:%s:%s" % (episode['show'],
                                              episode['season'],
