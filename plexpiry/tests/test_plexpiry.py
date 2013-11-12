@@ -4,13 +4,16 @@ import testtools
 from plexpiry import plexpiry
 
 
-FAKE_DICT = \
-    {
-        'a': 1,
-        'b': 2,
-        'c': 3,
-        'd': 4,
-    }
+FAKE_DICT = {'a': 1,
+             'b': 2,
+             'c': 3,
+             'd': 4,
+             }
+
+# FIXME: Check this against a real response
+FAKE_SECTIONS = {'show': 3,
+                 'movies': 5,
+                 }
 
 
 class FakeOptions():
@@ -82,3 +85,7 @@ class TestPlexpiry(testtools.TestCase):
 
     def test_parse_time_negative(self):
         self.assertRaises(ValueError, self.plexpiry.parse_time, '-1')
+
+    def test_find_sections(self):
+        self.plexpiry.find_sections()
+        self.assertEqual(FAKE_SECTIONS, self.plexpiry.sections)
