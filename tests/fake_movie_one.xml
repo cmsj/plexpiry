@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MediaContainer size="1" allowSync="1" identifier="com.plexapp.plugins.library" librarySectionID="1" librarySectionTitle="Movies" librarySectionUUID="b45f5198-1a51-41a4-a51a-a60125748675" mediaTagPrefix="/system/bundle/media/flags/" mediaTagVersion="1420770810">
+<Video ratingKey="1024" key="/library/metadata/1024" guid="com.plexapp.agents.imdb://tt2333804?lang=en" studio="Picture Perfect Corporation" type="movie" title="The Zero Theorem" titleSort="Zero Theorem" contentRating="15+" summary="A computer hacker&apos;s goal to discover the reason for human existence continually finds his work interrupted thanks to the Management; this time, they send a teenager and lusty love interest to distract him." rating="5.9" viewCount="1" lastViewedAt="1418653256" year="2013" tagline="Nothing is Everything" thumb="/library/metadata/1024/thumb/1418349807" art="/library/metadata/1024/art/1418349807" duration="6387304" originallyAvailableAt="2013-09-02" addedAt="1418348404" updatedAt="1418349807" chapterSource="media">
+<Media videoResolution="1080" id="1097" duration="6387304" bitrate="10286" width="1920" height="1040" aspectRatio="1.85" audioChannels="6" audioCodec="dca" videoCodec="h264" container="mkv" videoFrameRate="24p">
+<Part id="1378" key="/library/parts/1378/file.mkv" duration="6387304" file="/Volumes/Data/Media/Movies/The Zero Theorem (2013)/The Zero Theorem.mkv" size="8212823441" container="mkv">
+<Stream id="4802" streamType="1" codec="h264" index="0" bitrate="8781" language="English" languageCode="eng" bitDepth="8" cabac="1" chromaSubsampling="4:2:0" codecID="V_MPEG4/ISO/AVC" colorSpace="yuv" duration="6387304" frameRate="23.976" frameRateMode="cfr" hasScalingMatrix="0" height="1040" level="41" profile="high" refFrames="4" scanType="progressive" title="" width="1920" />
+<Stream id="4803" streamType="2" selected="1" codec="dca" index="1" channels="6" bitrate="1509" language="English" languageCode="eng" bitDepth="24" bitrateMode="cbr" codecID="A_DTS" duration="6387298" samplingRate="48000" title="" />
+<Stream id="4804" streamType="3" codec="srt" index="2" language="English" languageCode="eng" codecID="S_TEXT/UTF8" format="srt" title="" />
+<Stream id="4805" streamType="3" codec="srt" index="3" language="English" languageCode="eng" codecID="S_TEXT/UTF8" format="srt" title="" />
+<Stream id="4806" key="/library/streams/4806" streamType="3" codec="idx" subIndex="0" language="English" languageCode="eng" format="vobsub" />
+<Stream id="4807" key="/library/streams/4807" streamType="3" codec="idx" subIndex="1" language="English" languageCode="eng" format="vobsub" />
+<Stream id="4808" key="/library/streams/4808" streamType="3" codec="idx" subIndex="4" language="Norsk" languageCode="nor" format="vobsub" />
+<Stream id="4809" key="/library/streams/4809" streamType="3" codec="idx" subIndex="3" language="Svenska" languageCode="swe" format="vobsub" />
+<Stream id="4810" key="/library/streams/4810" streamType="3" codec="idx" subIndex="5" language="Dansk" languageCode="dan" format="vobsub" />
+<Stream id="4811" key="/library/streams/4811" streamType="3" codec="idx" subIndex="7" language="हिन्दी, हिंदी" languageCode="hin" format="vobsub" />
+<Stream id="4812" key="/library/streams/4812" streamType="3" codec="idx" subIndex="6" language="Suomi" languageCode="fin" format="vobsub" />
+<Stream id="4813" key="/library/streams/4813" streamType="3" codec="idx" subIndex="2" language="Español" languageCode="spa" format="vobsub" />
+</Part>
+</Media>
+<Genre id="387" tag="Fantasy" count="15" />
+<Genre id="96" tag="Drama" count="82" />
+<Genre id="285" tag="Science Fiction" count="28" />
+<Writer id="5289" tag="Pat Rushin" />
+<Director id="5288" tag="Terry Gilliam" />
+<Producer id="5302" tag="Nicolas Chartier" />
+<Producer id="5303" tag="Dean Zanuck" />
+<Country id="125" tag="USA" count="123" />
+<Role id="4040" tag="Ben Whishaw" count="6" role="Doctor #3" />
+<Role id="5290" tag="Radu Andrei Micu" role="Sexshop owner" />
+<Role id="5291" tag="Emil Hostina" role="Slim Clone" />
+<Role id="5292" tag="Naomi Everson" role="Lacy" />
+<Role id="204" tag="Matt Damon" count="2" role="Management" />
+<Role id="5293" tag="Sanjeev Bhaskar" role="Doctor #1" />
+<Role id="5294" tag="Madison Lygo" role="Bonnie" />
+<Role id="5295" tag="Dana Rogoz" role="Pizza Girl" />
+<Role id="5296" tag="Tudor Istodor" role="Man on the street" />
+<Role id="5297" tag="Christoph Waltz" count="3" role="Qohen Leth" />
+<Role id="5298" tag="David Thewlis" role="Joby" />
+<Role id="5299" tag="Mélanie Thierry" role="Bainsley" />
+<Role id="5300" tag="George Remes" role="Policeman" />
+<Role id="1183" tag="Lucas Hedges" count="2" role="Bob" />
+<Role id="5301" tag="Tilda Swinton" count="2" role="Dr. Shrink-Rom" />
+</Video>
+</MediaContainer>

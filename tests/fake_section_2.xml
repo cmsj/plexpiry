@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MediaContainer size="1" allowSync="1" identifier="com.plexapp.plugins.library" librarySectionID="1" librarySectionTitle="Movies" librarySectionUUID="b45f5198-1a51-41a4-a51a-a60125748675" mediaTagPrefix="/system/bundle/media/flags/" mediaTagVersion="1420770810">
+<Video ratingKey="2" key="/library/metadata/2" guid="com.plexapp.agents.imdb://tt1306980?lang=en" studio="Mandate Pictures" type="movie" title="50/50" contentRating="14A" summary="Inspired by a true story, a comedy centered on a 27-year-old guy who learns of his cancer diagnosis, and his subsequent struggle to beat the disease." rating="6.4" year="2011" tagline="It takes a pair to beat the odds." thumb="/library/metadata/2/thumb/1401322658" art="/library/metadata/2/art/1401322658" duration="6003008" originallyAvailableAt="2011-09-12" addedAt="1398269101" updatedAt="1401322658">
+<Media videoResolution="1080" id="2" duration="6003008" bitrate="13379" width="1920" height="1080" aspectRatio="1.78" audioChannels="6" audioCodec="dca" videoCodec="h264" container="mkv" videoFrameRate="24p">
+<Part id="310" key="/library/parts/310/file.mkv" duration="6003008" file="/Volumes/Data/Media/Movies/5050 (2011)/5050.mkv" size="10039055503" container="mkv">
+<Stream id="920" streamType="1" codec="h264" index="0" bitrate="12931" language="English" languageCode="eng" bitDepth="8" cabac="1" chromaSubsampling="4:2:0" codecID="V_MPEG4/ISO/AVC" colorSpace="yuv" duration="6003003" frameRate="23.976" frameRateMode="cfr" hasScalingMatrix="0" height="1080" level="41" profile="high" refFrames="4" scanType="progressive" title="" width="1920" />
+<Stream id="921" streamType="2" selected="1" codec="dca" index="1" channels="6" bitrate="1536" language="English" languageCode="eng" bitDepth="24" bitrateMode="vbr" codecID="A_DTS" duration="6003008" profile="ma" samplingRate="48000" title="" />
+<Stream id="922" streamType="2" codec="ac3" index="2" channels="6" bitrate="448" language="English" languageCode="eng" bitDepth="16" bitrateMode="cbr" codecID="A_AC3" dialogNorm="-31" duration="6003008" samplingRate="48000" title="" />
+<Stream id="923" streamType="3" default="1" index="3" language="Nederlands" languageCode="dut" codecID="S_TEXT/UTF8" format="srt" title="" />
+<Stream id="924" streamType="3" index="4" language="English" languageCode="eng" codecID="S_TEXT/UTF8" format="srt" title="" />
+</Part>
+</Media>
+<Genre id="123" tag="Comedy" count="100" />
+<Genre id="188" tag="Comedy-drama" count="6" />
+<Genre id="189" tag="Documentary" count="5" />
+<Genre id="96" tag="Drama" count="82" />
+<Writer id="171" tag="Krzysztof Nowiński" />
+<Writer id="172" tag="Will Reiser" />
+<Director id="170" tag="Jonathan Levine" count="2" />
+<Producer id="190" tag="Evan Goldberg" count="2" />
+<Producer id="191" tag="Seth Rogen" count="2" />
+<Producer id="192" tag="Ben Karlin" />
+<Country id="193" tag="Poland" />
+<Role id="173" tag="Anjelica Huston" role="Diane" />
+<Role id="174" tag="Matt Frewer" role="Mitch" />
+<Role id="175" tag="Andrew Airlie" role="Dr. Ross" />
+<Role id="176" tag="Philip Baker Hall" count="2" role="Alan" />
+<Role id="177" tag="Sarah Smyth" role="Jenny" />
+<Role id="178" tag="Seth Rogen" count="3" role="Kyle" />
+<Role id="179" tag="Peter Kelamis" role="Phil" />
+<Role id="180" tag="Donna Yamamoto" role="Dr. Walderson" />
+<Role id="181" tag="Jessica Parker Kennedy" role="Jackie" />
+<Role id="182" tag="Joseph Gordon-Levitt" count="2" role="Adam" />
+<Role id="183" tag="Serge Houde" role="Richard" />
+<Role id="184" tag="Yee Jee Tso" role="Dr. Lee" />
+<Role id="185" tag="Stephanie Beard" role="Susan" />
+<Role id="186" tag="Anna Kendrick" count="3" role="Katie" />
+<Role id="187" tag="Bryce Dallas Howard" role="Rachael" />
+</Video>
+</MediaContainer>

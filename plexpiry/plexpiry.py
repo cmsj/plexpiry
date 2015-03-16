@@ -1,15 +1,15 @@
 #!/usr/bin/python
 """Script to interface with Plex to find media that can be deleted."""
 
+import ConfigParser
 import copy
 import datetime
+from optparse import OptionParser
 import os
 import sys
 import time
 import urllib2
 from xml.etree import ElementTree
-from optparse import OptionParser
-import ConfigParser
 
 DEFAULT_CONFIG = {}
 
@@ -44,12 +44,6 @@ class Plexpiry:
 
     def __init__(self, options):
         self.options = options
-        self.config = ConfigParser.ConfigParser()
-        try:
-            self.config.read(os.path.expanduser(self.options.config_file))
-        except ConfigParser.ParsingError as e:
-            self.err("Unable to parse config file: %s" % e.message)
-            sys.exit(1)
         self.dbg("Command line options: %s" % self.options)
         self.urlbase = "http://%s:%s" % (options.server, options.port)
 
@@ -65,6 +59,19 @@ class Plexpiry:
     def info(self, message):
         """Print an info statement."""
         print("INFO: %s" % message)
+
+    def open_config_file(self):
+        """Open the config file."""
+        return open(os.path.expanduser(self.options.config_file))
+
+    def load_config(self):
+        """Load the config file."""
+        self.config = ConfigParser.ConfigParser()
+        try:
+            self.config.readfp(self.open_config_file)
+        except ConfigParser.ParsingError as e:
+            self.err("Unable to parse config file: %s" % e.message)
+            sys.exit(1)
 
     def trim_dict(self, source_dict, keys):
         """Return a filtered version of 'source_dict'."""
@@ -95,11 +102,11 @@ class Plexpiry:
             raise ValueError("Unable to parse: %s" % time)
 
     def get_config_sections(self):
-        """Get all the sections in the config"""
+        """Get all the sections in the config."""
         return self.config.sections()
 
     def get_config_section(self, section):
-        """Get a single section as a dict"""
+        """Get a single section as a dict."""
         tmpconfig = {}
         try:
             items = self.config.items(section)
@@ -112,7 +119,8 @@ class Plexpiry:
 
     def collapse_config(self, title, kind):
         """Construct a per-title configuration dict that takes global values
-        and layers per-title values over the top"""
+        and layers per-title values over the top
+        """
         unionconfig = copy.deepcopy(DEFAULT_CONFIG)
         unionconfig["__name"] = title
 
@@ -125,7 +133,7 @@ class Plexpiry:
         return unionconfig
 
     def is_watched(self, media):
-        """Determine if a piece of media has been watched"""
+        """Determine if a piece of media has been watched."""
         return ("lastViewedAt" in media)
 
     def fetch_tree(self, url):
@@ -143,7 +151,7 @@ class Plexpiry:
         self.dbg("Found sections: %s" % self.sections)
 
     def refresh_plex(self):
-        """Instruct Plex to re-index the library after we've done our work"""
+        """Instruct Plex to re-index the library after we've done our work."""
         for section in self.sections:
             url = "%s/library/sections/%s/refresh" % (self.urlbase, section)
             self.dbg("Refreshing Plex at: %s" % url)
@@ -229,7 +237,7 @@ class Plexpiry:
         return movies
 
     def should_expire_media(self, media, config):
-        """Determine if a piece of mediais expired"""
+        """Determine if a piece of mediais expired."""
         if "ignore" in config and config["ignore"]:
             self.dbg("Ignoring: '%s' per configuration" % config["__name"])
             return False
@@ -260,7 +268,7 @@ class Plexpiry:
             return to_delete
 
     def get_media_age(self, media, key):
-        """Calculate the age of a piece of media, given some time value"""
+        """Calculate the age of a piece of media, given some time value."""
         time_now = int(time.time())
         if key == "originallyAvailableAt":
             event = (datetime.datetime.strptime(media[key], "%Y-%m-%d") -
@@ -282,9 +290,7 @@ class Plexpiry:
             url = opener.open(request)
 
     def expire(self):
-        """Process all media for being expired"""
-        # TODO: Tell Plex to rescan its library after we're done
-
+        """Process all media for being expired."""
         # First up, movies
         movies = self.get_movie_tree()
         for movie_id in movies:

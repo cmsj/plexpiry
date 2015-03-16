@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MediaContainer size="7" allowSync="1" art="/library/metadata/425/art/1401322765" banner="/library/metadata/425/banner/1401322765" grandparentContentRating="TV-MA" grandparentStudio="Channel 4" grandparentTheme="/library/metadata/425/theme/1401322765" grandparentTitle="Spaced" identifier="com.plexapp.plugins.library" key="426" librarySectionID="2" librarySectionTitle="TV Shows" librarySectionUUID="ee870577-3076-4256-8715-df02440e39bd" mediaTagPrefix="/system/bundle/media/flags/" mediaTagVersion="1420770810" nocache="1" parentIndex="1" parentTitle="" sortAsc="1" theme="/library/metadata/425/theme/1401322765" thumb="/library/metadata/426/thumb/1401322765" title1="Spaced" title2="Season 1" viewGroup="episode" viewMode="458810">
+<Video ratingKey="433" key="/library/metadata/433" parentRatingKey="426" type="episode" title="Episode 7" parentKey="/library/metadata/426" contentRating="Caution" summary="Daisy and Tim&apos;s domestic bliss is threatened when Tim&apos;s ex-girlfriend reappears and wants to get back together with him. Adult themes and strong language" index="7" rating="8.3" viewCount="1" lastViewedAt="1401322997" year="2007" thumb="/library/metadata/433/thumb/1401322765" duration="1491000" originallyAvailableAt="2007-05-21" addedAt="1401322741" updatedAt="1401322765">
+<Media videoResolution="sd" id="388" duration="1491000" bitrate="1617" width="640" height="360" aspectRatio="1.78" audioChannels="2" audioCodec="aac" videoCodec="drmi" container="mp4" videoFrameRate="PAL" optimizedForStreaming="1" has64bitOffsets="0">
+<Part id="460" key="/library/parts/460/file.m4v" duration="1491000" file="/Volumes/Data/Media/TV/Spaced/Season 1/07 Episode 7.m4v" size="301431688" container="mp4" has64bitOffsets="0" optimizedForStreaming="1" />
+</Media>
+<Writer tag="Simon Pegg" />
+<Writer tag="Jessica Stevenson" />
+<Director tag="Edgar Wright" />
+</Video>
+</MediaContainer>

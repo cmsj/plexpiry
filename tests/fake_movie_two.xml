@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MediaContainer size="1" allowSync="1" identifier="com.plexapp.plugins.library" librarySectionID="1" librarySectionTitle="Movies" librarySectionUUID="b45f5198-1a51-41a4-a51a-a60125748675" mediaTagPrefix="/system/bundle/media/flags/" mediaTagVersion="1420770810">
+<Video ratingKey="1135" key="/library/metadata/1135" guid="com.plexapp.agents.imdb://tt3102206?lang=en" studio="Cinetel Films" type="movie" title="Zodiac: Signs of the Apocalypse" summary="A 2,000-year-old astrology board possesses deadly powers that threaten the fate of humanity." rating="3.9" viewCount="1" lastViewedAt="1421675051" year="2014" tagline="The Signs are Everywhere" thumb="/library/metadata/1135/thumb/1423274621" art="/library/metadata/1135/art/1423274621" duration="5168120" originallyAvailableAt="2014-08-16" addedAt="1421060244" updatedAt="1423274621" chapterSource="media">
+<Media videoResolution="480" id="1194" duration="5168120" bitrate="1253" width="704" height="404" aspectRatio="1.78" audioChannels="2" audioCodec="aac" videoCodec="h264" container="mkv" videoFrameRate="PAL">
+<Part id="1493" key="/library/parts/1493/file.mkv" duration="5168120" file="/Volumes/Data/Media/Movies/Zodiac (2014)/Zodiac.mkv" size="809252714" container="mkv">
+<Stream id="5126" streamType="1" codec="h264" index="0" bitrate="1253" language="English" languageCode="eng" bitDepth="8" cabac="1" chromaSubsampling="4:2:0" codecID="V_MPEG4/ISO/AVC" colorSpace="yuv" duration="5168120" frameRate="25.000" frameRateMode="cfr" hasScalingMatrix="0" height="404" level="31" profile="high" refFrames="5" scanType="progressive" title="" width="704" />
+<Stream id="5127" streamType="2" selected="1" codec="aac" index="1" channels="2" language="English" languageCode="eng" codecID="A_AAC" duration="5168120" profile="lc" samplingRate="48000" title="" />
+<Stream id="5144" key="/library/streams/5144" streamType="3" codec="srt" language="English" languageCode="eng" format="srt" />
+</Part>
+</Media>
+<Genre id="285" tag="Science Fiction" count="28" />
+<Genre id="5973" tag="TV Movie" />
+<Writer id="5965" tag="David Sanderson" />
+<Director id="5964" tag="W.D. Hogan" />
+<Country id="3170" tag="Canada" count="2" />
+<Role id="4695" tag="Christopher Lloyd" count="2" role="Harry Setag" thumb="http://image.tmdb.org/t/p/original/iQzG9apaIsHnn7iGrer3YEDp8Zo.jpg" />
+<Role id="5966" tag="Aaron Douglas" role="Agent Woodward" thumb="http://image.tmdb.org/t/p/original/b8YqqTBvNvRn8ajWgr5yMCA6tUg.jpg" />
+<Role id="5967" tag="Joel Gretsch" role="Neil Martin" thumb="http://image.tmdb.org/t/p/original/5CeKN4wIQUAvF3mlRdeVAQ5ybSs.jpg" />
+<Role id="5968" tag="Andrea Brooks" role="Sophie" thumb="http://image.tmdb.org/t/p/original/90KwAgvEdQbV6wg9NdWxmAeBEKr.jpg" />
+<Role id="5969" tag="Reilly Dolman" role="" />
+<Role id="5970" tag="Emily Holmes" role="" />
+<Role id="5971" tag="Ben Cotton" role="" thumb="http://image.tmdb.org/t/p/original/922dX7dP43qvKmqodz6akxdfJ5p.jpg" />
+<Role id="5972" tag="Douglas Chapman" role="" />
+</Video>
+</MediaContainer>

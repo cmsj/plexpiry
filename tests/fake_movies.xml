@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MediaContainer size="168" allowSync="1" art="/:/resources/movie-fanart.jpg" identifier="com.plexapp.plugins.library" librarySectionID="1" librarySectionTitle="Movies" librarySectionUUID="b45f5198-1a51-41a4-a51a-a60125748675" mediaTagPrefix="/system/bundle/media/flags/" mediaTagVersion="1420770810" thumb="/:/resources/movie.png" title1="Movies" title2="All Movies" viewGroup="movie" viewMode="65592">
+<Video ratingKey="1024" key="/library/metadata/1024" studio="Picture Perfect Corporation" type="movie" title="The Zero Theorem" titleSort="Zero Theorem" contentRating="15+" summary="A computer hacker&apos;s goal to discover the reason for human existence continually finds his work interrupted thanks to the Management; this time, they send a teenager and lusty love interest to distract him." rating="5.9" viewCount="1" lastViewedAt="1418653256" year="2013" tagline="Nothing is Everything" thumb="/library/metadata/1024/thumb/1418349807" art="/library/metadata/1024/art/1418349807" duration="6387304" originallyAvailableAt="2013-09-02" addedAt="1418348404" updatedAt="1418349807" chapterSource="media">
+<Media videoResolution="1080" id="1097" duration="6387304" bitrate="10286" width="1920" height="1040" aspectRatio="1.85" audioChannels="6" audioCodec="dca" videoCodec="h264" container="mkv" videoFrameRate="24p">
+<Part id="1378" key="/library/parts/1378/file.mkv" duration="6387304" file="/Volumes/Data/Media/Movies/The Zero Theorem (2013)/The Zero Theorem.mkv" size="8212823441" container="mkv" />
+</Media>
+<Genre tag="Fantasy" />
+<Genre tag="Drama" />
+<Writer tag="Pat Rushin" />
+<Director tag="Terry Gilliam" />
+<Country tag="USA" />
+<Role tag="Ben Whishaw" />
+<Role tag="Radu Andrei Micu" />
+<Role tag="Emil Hostina" />
+</Video>
+<Video ratingKey="1135" key="/library/metadata/1135" studio="Cinetel Films" type="movie" title="Zodiac: Signs of the Apocalypse" summary="A 2,000-year-old astrology board possesses deadly powers that threaten the fate of humanity." rating="3.9" viewCount="1" lastViewedAt="1421675051" year="2014" tagline="The Signs are Everywhere" thumb="/library/metadata/1135/thumb/1423274621" art="/library/metadata/1135/art/1423274621" duration="5168120" originallyAvailableAt="2014-08-16" addedAt="1421060244" updatedAt="1423274621" chapterSource="media">
+<Media videoResolution="480" id="1194" duration="5168120" bitrate="1253" width="704" height="404" aspectRatio="1.78" audioChannels="2" audioCodec="aac" videoCodec="h264" container="mkv" videoFrameRate="PAL">
+<Part id="1493" key="/library/parts/1493/file.mkv" duration="5168120" file="/Volumes/Data/Media/Movies/Zodiac (2014)/Zodiac.mkv" size="809252714" container="mkv" />
+</Media>
+<Genre tag="Science Fiction" />
+<Genre tag="TV Movie" />
+<Writer tag="David Sanderson" />
+<Director tag="W.D. Hogan" />
+<Country tag="Canada" />
+<Role tag="Christopher Lloyd" />
+<Role tag="Aaron Douglas" />
+<Role tag="Joel Gretsch" />
+</Video>
+</MediaContainer>

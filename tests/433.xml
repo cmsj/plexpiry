@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MediaContainer size="1" allowSync="1" identifier="com.plexapp.plugins.library" librarySectionID="2" librarySectionTitle="TV Shows" librarySectionUUID="ee870577-3076-4256-8715-df02440e39bd" mediaTagPrefix="/system/bundle/media/flags/" mediaTagVersion="1420770810">
+<Video ratingKey="433" key="/library/metadata/433" parentRatingKey="426" grandparentRatingKey="425" guid="com.plexapp.agents.thetvdb://72658/1/7?lang=en" type="episode" title="Episode 7" grandparentKey="/library/metadata/425" parentKey="/library/metadata/426" grandparentTitle="Spaced" contentRating="Caution" summary="Daisy and Tim&apos;s domestic bliss is threatened when Tim&apos;s ex-girlfriend reappears and wants to get back together with him. Adult themes and strong language" index="7" parentIndex="1" rating="8.3" viewCount="1" lastViewedAt="1401322997" year="2007" thumb="/library/metadata/433/thumb/1401322765" art="/library/metadata/425/art/1401322765" parentThumb="/library/metadata/426/thumb/1401322765" grandparentThumb="/library/metadata/425/thumb/1401322765" grandparentTheme="/library/metadata/425/theme/1401322765" duration="1491000" originallyAvailableAt="2007-05-21" addedAt="1401322741" updatedAt="1401322765">
+<Media videoResolution="sd" id="388" duration="1491000" bitrate="1617" width="640" height="360" aspectRatio="1.78" audioChannels="2" audioCodec="aac" videoCodec="drmi" container="mp4" videoFrameRate="PAL" optimizedForStreaming="1" has64bitOffsets="0">
+<Part id="460" key="/library/parts/460/file.m4v" duration="1491000" file="/Volumes/Data/Media/TV/Spaced/Season 1/07 Episode 7.m4v" size="301431688" container="mp4" has64bitOffsets="0" optimizedForStreaming="1">
+<Stream id="1519" streamType="2" selected="1" codec="aac" index="0" channels="2" bitrate="128" language="English" languageCode="eng" bitrateMode="cbr" codecID="40" duration="1491000" profile="lc" samplingRate="44100" title="" />
+<Stream id="1520" streamType="1" codec="drmi" index="1" bitrate="1480" language="English" languageCode="eng" bitDepth="8" chromaSubsampling="4:2:0" codecID="drmi / avc1" colorSpace="yuv" duration="1491000" frameRate="25.000" frameRateMode="cfr" height="360" scanType="progressive" title="" width="640" />
+</Part>
+</Media>
+<Writer id="3513" tag="Simon Pegg" count="14" />
+<Writer id="3512" tag="Jessica Stevenson" count="14" />
+<Director id="3514" tag="Edgar Wright" count="14" />
+</Video>
+</MediaContainer>
