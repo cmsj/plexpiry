@@ -40,6 +40,7 @@ class Plexpiry:
     options = None
     config = None
     sections = None
+    has_deleted = False
 
     def __init__(self, options):
         self.options = options
@@ -271,6 +272,7 @@ class Plexpiry:
 
     def delete(self, media_id):
         """Delete a specific piece of media."""
+        self.has_deleted = True
         url = ("%s/library/metadata/%s" % (self.urlbase, media_id))
         self.dbg("Deleting: %s" % media_id)
         opener = urllib2.build_opener(urllib2.HTTPHandler)
@@ -318,7 +320,8 @@ class Plexpiry:
                         self.dbg("Skipping: %s:%s:%s" % (show["title"],
                                                          season["title"],
                                                          episode["title"]))
-        self.refresh_plex()
+        if self.has_deleted:
+            self.refresh_plex()
 
 
 def main():
