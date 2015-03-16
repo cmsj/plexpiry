@@ -1,11 +1,17 @@
 #!/usr/bin/python
-"""Script to interface with Plex to find old media that can be deleted."""
+"""Script to interface with Plex to find media that can be deleted."""
 
+import copy
+import datetime
+import os
 import sys
 import time
 import urllib2
 from xml.etree import ElementTree
-from optparse import OptionParser, OptionGroup
+from optparse import OptionParser
+import ConfigParser
+
+DEFAULT_CONFIG = {}
 
 
 def parse_options():
@@ -22,57 +28,28 @@ def parse_options():
     parser.add_option('-p', '--port', action='store', dest='port',
                       default='32400',
                       help='port to talk to the server on [default %default]')
-
-    group = OptionGroup(parser, "Expiry options",
-                        "These options let you configure what kinds of media "
-                        "you want to expire, and when. "
-                        "Times default to seconds, but you can specify "
-                        "d, w, y suffixes for days/weeks/years "
-                        "respectively")
-    group.add_option('--watched-tv', action='store',
-                     dest='watched_tv', metavar='TIME',
-                     help='expire watched TV shows after TIME')
-    group.add_option('--unwatched-tv', action='store',
-                     dest='unwatched_tv', metavar='TIME',
-                     help='expire unwatched TV shows after TIME')
-    group.add_option('--watched-movies', action='store',
-                     dest='watched_movies', metavar='TIME',
-                     help='expire watched movies after TIME')
-    group.add_option('--unwatched-movies', action='store',
-                     dest='unwatched_movies', metavar='TIME',
-                     help='expire unwatched movies after TIME')
-    parser.add_option_group(group)
-
-    group = OptionGroup(parser, "Ignore options",
-                        "These options let you ignore movies and TV shows "
-                        "that you do not want to ever be expired."
-                        "They can be specified multiple times.")
-    group.add_option('--ignore-tv-show', action='append',
-                     dest='ignore_tv_shows',
-                     metavar='SHOW',
-                     help='a TV show to ignore')
-    group.add_option('--ignore-movie', action='append',
-                     dest='ignore_movies',
-                     metavar='MOVIE',
-                     help='a movie to ignore')
-    parser.add_option_group(group)
+    parser.add_option('-c', '--config', action='store', dest='config_file',
+                      default='~/.config/plexpiry.conf')
 
     (options, args) = parser.parse_args()
-    if None == options.watched_tv == options.unwatched_tv == \
-       options.watched_movies == options.unwatched_movies:
-        print("Error: You must specify at least one expiry option")
-        parser.print_help()
-        sys.exit(1)
+
     return options
 
 
 class Plexpiry:
     options = None
+    config = None
     sections = None
 
     def __init__(self, options):
         self.options = options
-        self.dbg(self.options)
+        self.config = ConfigParser.ConfigParser()
+        try:
+            self.config.read(os.path.expanduser(self.options.config_file))
+        except ConfigParser.ParsingError as e:
+            self.err("Unable to parse config file: %s" % e.message)
+            sys.exit(1)
+        self.dbg("Command line options: %s" % self.options)
         self.urlbase = "http://%s:%s" % (options.server, options.port)
 
     def dbg(self, message):
@@ -83,6 +60,10 @@ class Plexpiry:
     def err(self, message):
         """Print an error statement."""
         print("ERROR: %s" % message)
+
+    def info(self, message):
+        """Print an info statement."""
+        print("INFO: %s" % message)
 
     def trim_dict(self, source_dict, keys):
         """Return a filtered version of 'source_dict'."""
@@ -112,6 +93,40 @@ class Plexpiry:
         else:
             raise ValueError("Unable to parse: %s" % time)
 
+    def get_config_sections(self):
+        """Get all the sections in the config"""
+        return self.config.sections()
+
+    def get_config_section(self, section):
+        """Get a single section as a dict"""
+        tmpconfig = {}
+        try:
+            items = self.config.items(section)
+        except ConfigParser.NoSectionError:
+            return None
+
+        for (key, value) in items:
+            tmpconfig[key] = value
+        return tmpconfig
+
+    def collapse_config(self, title, kind):
+        """Construct a per-title configuration dict that takes global values
+        and layers per-title values over the top"""
+        unionconfig = copy.deepcopy(DEFAULT_CONFIG)
+        unionconfig["__name"] = title
+
+        for section in ["global", kind, title]:
+            tmp = self.get_config_section(section)
+            if tmp:
+                unionconfig.update(tmp)
+
+        self.dbg("Resolved config for '%s' to: %s" % (title, unionconfig))
+        return unionconfig
+
+    def is_watched(self, media):
+        """Determine if a piece of media has been watched"""
+        return ("lastViewedAt" in media)
+
     def fetch_tree(self, url):
         """Fetch the XML tree for a url."""
         self.dbg("Fetching: %s" % url)
@@ -125,6 +140,14 @@ class Plexpiry:
             self.sections[section.attrib['type']] = \
                 self.trim_dict(section.attrib, ['title', 'key'])
         self.dbg("Found sections: %s" % self.sections)
+
+    def refresh_plex(self):
+        """Instruct Plex to re-index the library after we've done our work"""
+        for section in self.sections:
+            url = "%s/library/sections/%s/refresh" % (self.urlbase, section)
+            self.dbg("Refreshing Plex at: %s" % url)
+            if not self.options.dryrun:
+                urllib2.urlopen(url)
 
     def find_tv_shows(self):
         """Get the TV shows."""
@@ -158,7 +181,8 @@ class Plexpiry:
             data = self.get_tv_episode(episode.attrib['ratingKey'])
             episodes[episode.attrib['ratingKey']] = \
                 self.trim_dict(data, ['title', 'ratingKey', 'viewCount',
-                                      'lastViewedAt', 'addedAt'])
+                                      'lastViewedAt', 'addedAt',
+                                      'originallyAvailableAt'])
         return episodes
 
     def get_tv_episode(self, episode_id):
@@ -199,92 +223,51 @@ class Plexpiry:
             data = self.get_movie(movie.attrib['ratingKey'])
             movies[movie.attrib['ratingKey']] = \
                 self.trim_dict(data, ['title', 'ratingKey', 'viewCount',
-                                      'lastViewedAt', 'addedAt'])
+                                      'lastViewedAt', 'addedAt',
+                                      'originallyAvailableAt'])
         return movies
 
-    def find_expired_tv(self, max_age, expiry_type):
-        """Find TV episodes that have expired."""
-        to_expire = []
-        shows = self.get_tv_tree()
+    def should_expire_media(self, media, config):
+        """Determine if a piece of mediais expired"""
+        if "ignore" in config and config["ignore"]:
+            self.dbg("Ignoring: '%s' per configuration" % config["__name"])
+            return False
 
-        for show_id in shows:
-            show = shows[show_id]
-            if show["title"] in self.options.ignore_tv_shows:
-                continue
-            for season_id in show['seasons']:
-                season = show['seasons'][season_id]
-                for episode_id in season['episodes']:
-                    episode = season['episodes'][episode_id]
-                    msg = "Inspecting %s:%s:%s: " % (show["title"],
-                                                     season["title"],
-                                                     episode["title"])
-                    if self.should_expire_tv_episode(episode, max_age,
-                                                     expiry_type):
-                        self.dbg("%s Expiring." % msg)
-                        to_expire.append({"show": show["title"],
-                                          "season": season["title"],
-                                          "episode": episode})
-                    else:
-                        self.dbg("%s Skipping." % msg)
-        return to_expire
+        to_delete = []
+        keypairs = []
+        is_watched = self.is_watched(media)
 
-    def should_expire_tv_episode(self, episode, max_age, expiry_type):
-        """Determine if a TV episode is expired, either for having been
-        watched more than max_age seconds ago, or not having been watched
-        after max_age seconds.
-        """
+        if is_watched and "watched" in config:
+            keypairs.append(("lastViewedAt", "watched"))
+        if "aired" in config:
+            keypairs.append(("originallyAvailableAt", "aired"))
+        if not is_watched and "unwatched" in config:
+            keypairs.append(("addedAt", "unwatched"))
+
+        if len(keypairs) == 0:
+            self.dbg("No configuration matches: %s" % config["__name"])
+            return False
+
+        for key, config_key in keypairs:
+            if self.get_media_age(media, key) > \
+               self.parse_time(config[config_key]):
+                to_delete.append(config_key)
+
+        if len(to_delete) == 0:
+            return False
+        else:
+            return to_delete
+
+    def get_media_age(self, media, key):
+        """Calculate the age of a piece of media, given some time value"""
         time_now = int(time.time())
-        age = 0
+        if key == "originallyAvailableAt":
+            event = (datetime.datetime.strptime(media[key], "%Y-%m-%d") -
+                     datetime.datetime(1970, 1, 1)).total_seconds()
+        else:
+            event = int(media[key])
 
-        if expiry_type == "watched":
-            if "lastViewedAt" in episode:
-                age = time_now - int(episode["lastViewedAt"])
-        elif expiry_type == "unwatched":
-            if "lastViewedAt" not in episode:
-                age = time_now - int(episode["addedAt"])
-
-        if age > max_age:
-            return True
-
-        return False
-
-    def should_expire_movie(self, movie, max_age, expiry_type):
-        """Decide whether to expire a movie based on its age and whether it's
-        watched or not.
-        """
-        time_now = int(time.time())
-        age = 0
-
-        if expiry_type == "watched":
-            if "lastViewedAt" in movie:
-                age = time_now - int(movie["lastViewedAt"])
-        elif expiry_type == "unwatched":
-            if "lastViewedAt" not in movie:
-                age = time_now - int(movie["addedAt"])
-
-        if age > max_age:
-            return True
-
-        return False
-
-    def find_expired_movies(self, max_age, expiry_type):
-        """Find movies and decide whether to expire them."""
-        to_expire = []
-        movies = self.get_movie_tree()
-
-        for movie_id in movies:
-            movie = movies[movie_id]
-            if movie["title"] in self.options.ignore_movies:
-                continue
-            msg = "Inspecting %s" % movie["title"]
-
-            if self.should_expire_movie(movie, max_age, expiry_type):
-                self.dbg("%s Expiring." % msg)
-                to_expire.append(movie)
-            else:
-                self.dbg("%s Skipping." % msg)
-
-        return to_expire
+        return (time_now - event)
 
     def delete(self, media_id):
         """Delete a specific piece of media."""
@@ -296,43 +279,51 @@ class Plexpiry:
         if not self.options.dryrun:
             url = opener.open(request)
 
+    def expire(self):
+        """Process all media for being expired"""
+        # TODO: Tell Plex to rescan its library after we're done
+
+        # First up, movies
+        movies = self.get_movie_tree()
+        for movie_id in movies:
+            movie = movies[movie_id]
+            config = self.collapse_config(movie["title"], "movies")
+            result = self.should_expire_media(movie, config)
+            if result:
+                self.info("Expiring: %s (matched: %s)" % (movie["title"],
+                                                          result))
+                self.delete(movie['ratingKey'])
+            else:
+                self.dbg("Skipping: %s" % movie["title"])
+
+        # Next, TV
+        shows = self.get_tv_tree()
+
+        for show_id in shows:
+            show = shows[show_id]
+            config = self.collapse_config(show["title"], "tv")
+            for season_id in show['seasons']:
+                season = show['seasons'][season_id]
+                for episode_id in season['episodes']:
+                    episode = season['episodes'][episode_id]
+                    result = self.should_expire_media(episode, config)
+                    if result:
+                        self.info("Expiring: %s:%s:%s (matched: %s)" %
+                                  (show["title"],
+                                   season["title"],
+                                   episode["title"],
+                                   result))
+                        self.delete(episode)
+                    else:
+                        self.dbg("Skipping: %s:%s:%s" % (show["title"],
+                                                         season["title"],
+                                                         episode["title"]))
+        self.refresh_plex()
+
 
 def main():
-    options = parse_options()
-    plex = Plexpiry(options)
-
-    if options.watched_tv:
-        time = plex.parse_time(options.watched_tv)
-        episodes = plex.find_expired_tv(time, "watched")
-        for episode in episodes:
-            plex.dbg("Deleting: %s:%s:%s" % (episode['show'],
-                                             episode['season'],
-                                             episode['episode']['title']))
-            plex.delete(episode['episode']['ratingKey'])
-
-    if options.unwatched_tv:
-        time = plex.parse_time(options.unwatched_tv)
-        episodes = plex.find_expired_tv(time, "unwatched")
-        for episode in episodes:
-            plex.dbg("Deleting: %s:%s:%s" % (episode['show'],
-                                             episode['season'],
-                                             episode['episode']['title']))
-            plex.delete(episode['episode']['ratingKey'])
-
-    if options.watched_movies:
-        time = plex.parse_time(options.watched_movies)
-        movies = plex.find_expired_movies(time, "watched")
-        for movie in movies:
-            plex.dbg("Deleting: %s" % movie['title'])
-            plex.delete(movie['ratingKey'])
-
-    if options.unwatched_movies:
-        time = plex.parse_time(options.unwatched_movies)
-        movies = plex.find_expired_movies(time, "unwatched")
-        for movie in movies:
-            plex.dbg("Deleting: %s" % movie['title'])
-            plex.delete(movie['ratingKey'])
-
+    plex = Plexpiry(parse_options())
+    plex.expire()
 
 if __name__ == "__main__":
     main()
