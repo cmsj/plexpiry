@@ -431,5 +431,12 @@ class TestPlexpiry(testtools.TestCase):
 
         self.assertEqual(options, plexpiry.parse_options(args))
 
-#    def test_expire(self):
-#        self.plexpiry.expire()
+    def test_expire(self):
+        self.options.dryrun = True
+        self.plexpiry.expire()
+
+    def test_expire_ignore_all(self):
+        self.options.dryrun = True
+        self.options.config_file = IGNORE_CONFIG_FILE
+        self.plexpiry.load_config()
+        self.plexpiry.expire()
