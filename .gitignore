@@ -46,3 +46,4 @@ ChangeLog
 
 cover
 .coverage.*
+.DS_Store

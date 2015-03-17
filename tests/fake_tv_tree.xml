@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MediaContainer size="7" allowSync="1" art="/library/metadata/425/art/1401322765" banner="/library/metadata/425/banner/1401322765" grandparentContentRating="TV-MA" grandparentStudio="Channel 4" grandparentTheme="/library/metadata/425/theme/1401322765" grandparentTitle="Spaced" identifier="com.plexapp.plugins.library" key="434" librarySectionID="2" librarySectionTitle="TV Shows" librarySectionUUID="ee870577-3076-4256-8715-df02440e39bd" mediaTagPrefix="/system/bundle/media/flags/" mediaTagVersion="1420770810" nocache="1" parentIndex="2" parentTitle="" sortAsc="1" theme="/library/metadata/425/theme/1401322765" thumb="/library/metadata/434/thumb/1401322765" title1="Spaced" title2="Season 2" viewGroup="episode" viewMode="458810">
+<Video ratingKey="433" key="/library/metadata/441" parentRatingKey="434" type="episode" title="Episode 7" parentKey="/library/metadata/434" contentRating="Caution" summary="With Marsha gone and the house up for sale, Daisy and Tim hatch a plan to save themselves and their friends from oblivion. However, has Daisy had enough? And does Tim really care? Adult themes and strong language" index="7" rating="8.1" viewCount="1" lastViewedAt="1401322997" year="2001" thumb="/library/metadata/441/thumb/1401322765" duration="1572000" originallyAvailableAt="2001-04-13" addedAt="1401322742" updatedAt="1401322765">
+<Media videoResolution="sd" id="395" duration="1572000" bitrate="1612" width="640" height="360" aspectRatio="1.78" audioChannels="2" audioCodec="aac" videoCodec="drmi" container="mp4" videoFrameRate="PAL" optimizedForStreaming="1" has64bitOffsets="0">
+<Part id="467" key="/library/parts/467/file.m4v" duration="1572000" file="/Volumes/Data/Media/TV/Spaced/Season 2/07 Episode 7.m4v" size="316806143" container="mp4" has64bitOffsets="0" optimizedForStreaming="1" />
+</Media>
+<Writer tag="Simon Pegg" />
+<Writer tag="Jessica Stevenson" />
+<Director tag="Edgar Wright" />
+</Video>
+</MediaContainer>

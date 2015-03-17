@@ -63,7 +63,9 @@ class Plexpiry:
 
     def open_config_file(self):
         """Open the config file."""
-        return open(os.path.expanduser(self.options.config_file))
+        path = os.path.expanduser(self.options.config_file)
+        fd = open(path)
+        return fd
 
     def load_config(self):
         """Load the config file."""
@@ -256,8 +258,9 @@ class Plexpiry:
             return False
 
         for key, config_key in keypairs:
-            if self.get_media_age(media, key) > \
-               self.parse_time(config[config_key]):
+            age = self.get_media_age(media, key)
+            configtime = self.parse_time(config[config_key])
+            if age > configtime:
                 to_delete.append(config_key)
 
         if len(to_delete) == 0:

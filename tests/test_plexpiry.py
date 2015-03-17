@@ -1,7 +1,6 @@
 import ConfigParser
 import fixtures
 import os
-import StringIO
 import testtools
 import urlparse
 
@@ -139,6 +138,11 @@ FAKE_MOVIE_TWO_XML = os.path.join(FAKE_PATH, "fake_movie_two.xml")
 GOOD_CONFIG_FILE = os.path.join(FAKE_PATH, "good_config_file.conf")
 BAD_CONFIG_FILE = os.path.join(FAKE_PATH, "bad_config_file.conf")
 BAD_CONFIG_FILE2 = os.path.join(FAKE_PATH, "bad_config_file2.conf")
+EMPTY_CONFIG_FILE = os.path.join(FAKE_PATH, "empty_file")
+NON_EXPIRING_CONFIG_FILE = os.path.join(FAKE_PATH,
+                                        "non_expiring_config_file.conf")
+IGNORE_CONFIG_FILE = os.path.join(FAKE_PATH, "ignore.conf")
+NEVER_EXPIRE_CONFIG_FILE = os.path.join(FAKE_PATH, "never_expire.conf")
 
 FAKE_EMPTY = os.path.join(FAKE_PATH, "empty_file")
 
@@ -147,27 +151,13 @@ TEST_TV_SEASON = 426
 TEST_TV_EPISODE = 433
 TEST_MOVIE = 1024
 
-FAKE_CONFIG_FILE = """[global]
-unwatched = 180d
-watched = 90d
-
-[movies]
-watched = 30d
-
-[tv]
-aired = 365d
-
-[Spaced]
-ignore = True
-"""
-
 
 class FakeOptions():
     debug = False
     server = "fakeserver"
     port = 1234
     dryrun = False
-    config_file = os.path.join(FAKE_PATH, GOOD_CONFIG_FILE)
+    config_file = GOOD_CONFIG_FILE
 
 
 class FakeBadConfigFileOptions():
@@ -175,7 +165,7 @@ class FakeBadConfigFileOptions():
     server = "fakeserver"
     port = 1234
     dryrun = False
-    config_file = os.path.join(FAKE_PATH, BAD_CONFIG_FILE)
+    config_file = BAD_CONFIG_FILE
 
 
 class TestPlexpiry(testtools.TestCase):
@@ -221,9 +211,6 @@ class TestPlexpiry(testtools.TestCase):
                 return open(FAKE_TV_TREE_XML)
             raise ValueError("Unknown request: %s" % url.path)
 
-        def fake_open_config_file(self):
-            return StringIO.StringIO(FAKE_CONFIG_FILE)
-
         self.useFixture(fixtures.NestedTempfile())
         self.stdout = self.useFixture(fixtures.StringStream('stdout')).stream
         self.useFixture(fixtures.MonkeyPatch('sys.stdout', self.stdout))
@@ -231,9 +218,6 @@ class TestPlexpiry(testtools.TestCase):
         self.useFixture(fixtures.MonkeyPatch('sys.stderr', stderr))
         self.logger = self.useFixture(fixtures.FakeLogger(name="plexpiry"))
         self.useFixture(fixtures.MonkeyPatch('urllib2.urlopen', fake_urlopen))
-        self.useFixture(fixtures.MonkeyPatch('plexpiry.plexpiry.Plexpiry.open_\
-                                              config_file',
-                                             fake_open_config_file))
         self.addCleanup(self.cleanUp)
 
         self.options = FakeOptions()
@@ -276,6 +260,10 @@ class TestPlexpiry(testtools.TestCase):
         new_dict = self.plexpiry.trim_dict(FAKE_DICT, ['a', 'd'])
         self.assertEqual(expected_dict, new_dict)
 
+    def test_open_config_file(self):
+        data = self.plexpiry.open_config_file().read()
+        self.assertEqual(open(GOOD_CONFIG_FILE).read(), data)
+
     def test_good_config_file(self):
         self.plexpiry = plexpiry.Plexpiry(self.options)
         self.plexpiry.load_config()
@@ -293,12 +281,18 @@ class TestPlexpiry(testtools.TestCase):
                           plexpiry.Plexpiry,
                           FakeBadConfigFileOptions())
 
+    def test_empty_config_file(self):
+        self.plexpiry = plexpiry.Plexpiry(self.options)
+        self.options.config_file = EMPTY_CONFIG_FILE
+        self.plexpiry.load_config()
+
     def test_get_config_sections(self):
-        self.assertEqual(['global', 'movies', 'tv', 'Spaced'],
+        self.assertEqual(['global', 'movies', 'tv'],
                          self.plexpiry.get_config_sections())
 
     def test_get_config_section(self):
-        self.assertEqual({'watched': '30d', 'unwatched': '90d'},
+        self.assertEqual({'watched': '30d',
+                          'unwatched': '90d'},
                          self.plexpiry.get_config_section("global"))
 
     def test_get_config_no_section(self):
@@ -306,9 +300,9 @@ class TestPlexpiry(testtools.TestCase):
 
     def test_collapse_config(self):
         self.assertEqual({'__name': 'Spaced',
-                          'ignore': 'True',
                           'unwatched': '90d',
-                          'watched': '30d'},
+                          'watched': '30d',
+                          'aired': '365d'},
                          self.plexpiry.collapse_config("Spaced", "tv"))
 
     def test_parse_time_bare(self):
@@ -368,16 +362,54 @@ class TestPlexpiry(testtools.TestCase):
         self.options.dryrun = True
         self.plexpiry.refresh_plex()
 
-    def test_should_expire_media(self):
+    def test_should_expire_media_watched(self):
         movie = self.plexpiry.get_movie(TEST_MOVIE)
+
         config = self.plexpiry.collapse_config(movie["title"], "movies")
         self.assertEqual(['watched'],
                          self.plexpiry.should_expire_media(movie, config))
 
+    def test_should_expire_media_watched_aired(self):
         show = self.plexpiry.get_tv_episode(TEST_TV_EPISODE)
+        self.options.config_file = GOOD_CONFIG_FILE
+        self.plexpiry.load_config()
+        config = self.plexpiry.collapse_config("Spaced", "tv")
+        self.assertEqual(['watched', 'aired'],
+                         self.plexpiry.should_expire_media(show,
+                                                           config))
+
+    def test_should_expire_media_noconfig(self):
+        show = self.plexpiry.get_tv_episode(TEST_TV_EPISODE)
+        self.options.config_file = EMPTY_CONFIG_FILE
+        self.plexpiry.load_config()
         config = self.plexpiry.collapse_config("Spaced", "tv")
         self.assertEqual(False, self.plexpiry.should_expire_media(show,
                                                                   config))
 
-    def test_expire(self):
-        self.plexpiry.expire()
+    def test_should_expire_media_notexpired(self):
+        show = self.plexpiry.get_tv_episode(TEST_TV_EPISODE)
+        self.options.config_file = NEVER_EXPIRE_CONFIG_FILE
+        self.plexpiry.load_config()
+        config = self.plexpiry.collapse_config("Spaced", "tv")
+        self.assertEqual(False, self.plexpiry.should_expire_media(show,
+                                                                  config))
+
+    def test_should_expire_media_notwatched_aired(self):
+        show = self.plexpiry.get_tv_episode(TEST_TV_EPISODE)
+        del(show["lastViewedAt"])
+        self.options.config_file = NON_EXPIRING_CONFIG_FILE
+        self.plexpiry.load_config()
+        config = self.plexpiry.collapse_config("Spaced", "tv")
+        self.assertEqual(['unwatched'],
+                         self.plexpiry.should_expire_media(show, config))
+
+    def test_should_expire_media_ignored(self):
+        show = self.plexpiry.get_tv_episode(TEST_TV_EPISODE)
+        self.options.config_file = IGNORE_CONFIG_FILE
+        self.plexpiry.load_config()
+        config = self.plexpiry.collapse_config("Spaced", "tv")
+        self.assertEqual(False, self.plexpiry.should_expire_media(show,
+                                                                  config))
+
+#    def test_expire(self):
+#        self.plexpiry.expire()
