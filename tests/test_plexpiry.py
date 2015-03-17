@@ -1,3 +1,4 @@
+import ConfigParser
 import fixtures
 import os
 import StringIO
@@ -17,6 +18,29 @@ FAKE_DICT = {'a': 1,
 FAKE_SECTIONS = {'show': {'key': '2', 'title': 'TV Shows'},
                  'movie': {'key': '1', 'title': 'Movies'},
                  }
+FAKE_TV_TREE = {'425':
+                {'seasons':
+                 {'426':
+                  {'episodes':
+                   {'433':
+                    {'addedAt': '1401322741',
+                     'lastViewedAt': '1401322997',
+                     'originallyAvailableAt': '2007-05-21',
+                     'ratingKey': '433',
+                     'title': 'Episode 7',
+                     'viewCount': '1'}},
+                   'title': 'Season 1'},
+                     '434':
+                     {'episodes':
+                      {'433':
+                       {'addedAt': '1401322741',
+                        'lastViewedAt': '1401322997',
+                        'originallyAvailableAt': '2007-05-21',
+                        'ratingKey': '433',
+                        'title': 'Episode 7',
+                        'viewCount': '1'}},
+                      'title': 'Season 2'}},
+                 'title': 'Spaced'}}
 FAKE_TV_SHOWS = {'425': {'title': 'Spaced'}}
 FAKE_TV_SEASONS = {'426': {'title': 'Season 1'}, '434': {'title': 'Season 2'}}
 FAKE_TV_EPISODES = {'433': {'addedAt': '1401322741',
@@ -97,6 +121,7 @@ FAKE_MOVIE_ONE = {'addedAt': '1418348404',
 FAKE_PATH = os.path.dirname(__file__)
 FAKE_SECTIONS_XML = os.path.join(FAKE_PATH, "fake_sections.xml")
 FAKE_SECTION_2_XML = os.path.join(FAKE_PATH, "fake_section_2.xml")
+FAKE_TV_TREE_XML = os.path.join(FAKE_PATH, "fake_tv_tree.xml")
 FAKE_TV_SHOWS_XML = os.path.join(FAKE_PATH, "fake_tv_shows.xml")
 FAKE_TV_SEASONS_XML = os.path.join(FAKE_PATH, "fake_tv_seasons.xml")
 FAKE_TV_EPISODES_XML = os.path.join(FAKE_PATH, "fake_tv_episodes.xml")
@@ -110,6 +135,12 @@ FAKE_TV_EPISODE_433_XML = os.path.join(FAKE_PATH, "433.xml")
 FAKE_MOVIES_XML = os.path.join(FAKE_PATH, "fake_movies.xml")
 FAKE_MOVIE_ONE_XML = os.path.join(FAKE_PATH, "fake_movie_one.xml")
 FAKE_MOVIE_TWO_XML = os.path.join(FAKE_PATH, "fake_movie_two.xml")
+
+GOOD_CONFIG_FILE = os.path.join(FAKE_PATH, "good_config_file.conf")
+BAD_CONFIG_FILE = os.path.join(FAKE_PATH, "bad_config_file.conf")
+BAD_CONFIG_FILE2 = os.path.join(FAKE_PATH, "bad_config_file2.conf")
+
+FAKE_EMPTY = os.path.join(FAKE_PATH, "empty_file")
 
 TEST_TV_SHOW = 425
 TEST_TV_SEASON = 426
@@ -126,7 +157,7 @@ watched = 30d
 [tv]
 aired = 365d
 
-[Octonauts]
+[Spaced]
 ignore = True
 """
 
@@ -134,7 +165,17 @@ ignore = True
 class FakeOptions():
     debug = False
     server = "fakeserver"
-    port = "fakeport"
+    port = 1234
+    dryrun = False
+    config_file = os.path.join(FAKE_PATH, GOOD_CONFIG_FILE)
+
+
+class FakeBadConfigFileOptions():
+    debug = False
+    server = "fakeserver"
+    port = 1234
+    dryrun = False
+    config_file = os.path.join(FAKE_PATH, BAD_CONFIG_FILE)
 
 
 class TestPlexpiry(testtools.TestCase):
@@ -172,6 +213,12 @@ class TestPlexpiry(testtools.TestCase):
                 return open(FAKE_TV_EPISODE_433_XML)
             if url.path == "/library/metadata/2":
                 return open(FAKE_SECTION_2_XML)
+            if url.path == "/library/sections/1/refresh":
+                return open(FAKE_EMPTY)
+            if url.path == "/library/sections/2/refresh":
+                return open(FAKE_EMPTY)
+            if url.path == "/library/metadata/434/children":
+                return open(FAKE_TV_TREE_XML)
             raise ValueError("Unknown request: %s" % url.path)
 
         def fake_open_config_file(self):
@@ -197,7 +244,7 @@ class TestPlexpiry(testtools.TestCase):
         self.options = FakeOptions()
 
     def test_urlbase(self):
-        self.assertEqual("http://fakeserver:fakeport", self.plexpiry.urlbase)
+        self.assertEqual("http://fakeserver:1234", self.plexpiry.urlbase)
 
     def test_dbg_silence(self):
         self.plexpiry.dbg("test_dbg_silence")
@@ -229,6 +276,41 @@ class TestPlexpiry(testtools.TestCase):
         new_dict = self.plexpiry.trim_dict(FAKE_DICT, ['a', 'd'])
         self.assertEqual(expected_dict, new_dict)
 
+    def test_good_config_file(self):
+        self.plexpiry = plexpiry.Plexpiry(self.options)
+        self.plexpiry.load_config()
+
+    def test_bad_config_file(self):
+        self.plexpiry = plexpiry.Plexpiry(self.options)
+        self.options.config_file = BAD_CONFIG_FILE
+        self.assertRaises(ConfigParser.ParsingError, self.plexpiry.load_config)
+
+        self.options.config_file = BAD_CONFIG_FILE2
+        self.assertRaises(ConfigParser.MissingSectionHeaderError,
+                          self.plexpiry.load_config)
+
+        self.assertRaises(ConfigParser.ParsingError,
+                          plexpiry.Plexpiry,
+                          FakeBadConfigFileOptions())
+
+    def test_get_config_sections(self):
+        self.assertEqual(['global', 'movies', 'tv', 'Spaced'],
+                         self.plexpiry.get_config_sections())
+
+    def test_get_config_section(self):
+        self.assertEqual({'watched': '30d', 'unwatched': '90d'},
+                         self.plexpiry.get_config_section("global"))
+
+    def test_get_config_no_section(self):
+        self.assertEqual(None, self.plexpiry.get_config_section("bogus"))
+
+    def test_collapse_config(self):
+        self.assertEqual({'__name': 'Spaced',
+                          'ignore': 'True',
+                          'unwatched': '90d',
+                          'watched': '30d'},
+                         self.plexpiry.collapse_config("Spaced", "tv"))
+
     def test_parse_time_bare(self):
         self.assertEqual(1, self.plexpiry.parse_time('1'))
 
@@ -249,6 +331,9 @@ class TestPlexpiry(testtools.TestCase):
 
     def test_find_sections(self):
         self.assertEqual(FAKE_SECTIONS, self.plexpiry.sections)
+
+    def test_get_tv_tree(self):
+        self.assertEquals(FAKE_TV_TREE, self.plexpiry.get_tv_tree())
 
     def test_find_tv_shows(self):
         shows = self.plexpiry.find_tv_shows()
@@ -273,3 +358,26 @@ class TestPlexpiry(testtools.TestCase):
     def test_get_movie(self):
         movie = self.plexpiry.get_movie(TEST_MOVIE)
         self.assertEqual(FAKE_MOVIE_ONE, movie)
+
+    def test_is_watched(self):
+        movie = self.plexpiry.get_movie(TEST_MOVIE)
+        self.assertEqual(True, self.plexpiry.is_watched(movie))
+
+    def test_refresh_plex(self):
+        self.plexpiry.refresh_plex()
+        self.options.dryrun = True
+        self.plexpiry.refresh_plex()
+
+    def test_should_expire_media(self):
+        movie = self.plexpiry.get_movie(TEST_MOVIE)
+        config = self.plexpiry.collapse_config(movie["title"], "movies")
+        self.assertEqual(['watched'],
+                         self.plexpiry.should_expire_media(movie, config))
+
+        show = self.plexpiry.get_tv_episode(TEST_TV_EPISODE)
+        config = self.plexpiry.collapse_config("Spaced", "tv")
+        self.assertEqual(False, self.plexpiry.should_expire_media(show,
+                                                                  config))
+
+    def test_expire(self):
+        self.plexpiry.expire()

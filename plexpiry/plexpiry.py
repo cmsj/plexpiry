@@ -46,6 +46,7 @@ class Plexpiry:
         self.options = options
         self.dbg("Command line options: %s" % self.options)
         self.urlbase = "http://%s:%s" % (options.server, options.port)
+        self.load_config()
 
     def dbg(self, message):
         """Print a debugging statement."""
@@ -67,11 +68,7 @@ class Plexpiry:
     def load_config(self):
         """Load the config file."""
         self.config = ConfigParser.ConfigParser()
-        try:
-            self.config.readfp(self.open_config_file)
-        except ConfigParser.ParsingError as e:
-            self.err("Unable to parse config file: %s" % e.message)
-            sys.exit(1)
+        self.config.readfp(self.open_config_file())
 
     def trim_dict(self, source_dict, keys):
         """Return a filtered version of 'source_dict'."""
@@ -152,7 +149,8 @@ class Plexpiry:
 
     def refresh_plex(self):
         """Instruct Plex to re-index the library after we've done our work."""
-        for section in self.sections:
+        for section in [self.sections["movie"]["key"],
+                        self.sections["show"]["key"]]:
             url = "%s/library/sections/%s/refresh" % (self.urlbase, section)
             self.dbg("Refreshing Plex at: %s" % url)
             if not self.options.dryrun:
@@ -331,7 +329,12 @@ class Plexpiry:
 
 
 def main():
-    plex = Plexpiry(parse_options())
+    try:
+        plex = Plexpiry(parse_options())
+    except ConfigParser.ParsingError as e:
+        print("Unable to parse config file: %s" % e.message)
+        sys.exit(1)
+
     plex.expire()
 
 if __name__ == "__main__":

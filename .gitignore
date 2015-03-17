@@ -45,4 +45,4 @@ ChangeLog
 *.swp
 
 cover
-.coveragerc
+.coverage.*
