@@ -151,7 +151,6 @@ TEST_TV_SEASON = 426
 TEST_TV_EPISODE = 433
 TEST_MOVIE = 1024
 
-
 FAKE_OPTIONS = ["-s", "fakeserver", "-p", "1234", "-c", GOOD_CONFIG_FILE]
 FAKE_BADCONFIGFILE_OPTIONS = ["-s", "fakeserver", "-p", "1234",
                               "-c", BAD_CONFIG_FILE]
