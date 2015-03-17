@@ -20,9 +20,10 @@ def parse_options(args=None):
     parser = argparse.ArgumentParser(description='Delete old media from Plex',
                                      formatter_class=formatter)
     parser.add_argument('-d', '--debug', action='store_true', dest='debug',
-                        help='turn on debugging')
+                        help='turn on debugging', default=False)
     parser.add_argument('-n', '--dry-run', action='store_true', dest='dryrun',
-                        help='simulate run and display what would be removed')
+                        help='simulate run and display what would be removed',
+                        default=False)
     parser.add_argument('-s', '--server', action='store', dest='server',
                         default='localhost',
                         help='server to talk to')
