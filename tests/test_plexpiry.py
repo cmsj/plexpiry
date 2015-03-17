@@ -411,5 +411,25 @@ class TestPlexpiry(testtools.TestCase):
         self.assertEqual(False, self.plexpiry.should_expire_media(show,
                                                                   config))
 
+    def test_delete(self):
+        show = self.plexpiry.get_tv_episode(TEST_TV_EPISODE)
+        self.options.dryrun = True
+        self.options.debug = True
+        self.plexpiry.delete(show["ratingKey"])
+        self.stdout.seek(0)
+        data = self.stdout.read().strip()
+        self.assertIn("DELETE http://fakeserver:1234/library/metadata/433",
+                      data)
+
+    def test_parse_options(self):
+        args = ['-d', '-n', '-s', 'foo', '-p', '123', '-c', 'bar']
+        options = {"debug": True,
+                   "dryrun": True,
+                   "server": "foo",
+                   "port": 123,
+                   "config_file": "bar"}
+
+        self.assertEqual(options, plexpiry.parse_options(args))
+
 #    def test_expire(self):
 #        self.plexpiry.expire()

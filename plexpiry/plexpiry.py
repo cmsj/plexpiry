@@ -1,10 +1,10 @@
 #!/usr/bin/python
 """Script to interface with Plex to find media that can be deleted."""
 
+import argparse
 import ConfigParser
 import copy
 import datetime
-from optparse import OptionParser
 import os
 import sys
 import time
@@ -14,26 +14,28 @@ from xml.etree import ElementTree
 DEFAULT_CONFIG = {}
 
 
-def parse_options():
+def parse_options(args=None):
     """Parse command line options."""
-    usage = "Usage: %prog [options]"
-    parser = OptionParser(usage)
-    parser.add_option('-d', '--debug', action='store_true', dest='debug',
-                      help='turn on debugging')
-    parser.add_option('-n', '--dry-run', action='store_true', dest='dryrun',
-                      help='simulate run and display what would be removed')
-    parser.add_option('-s', '--server', action='store', dest='server',
-                      default='localhost',
-                      help='server to talk to [default: %default]')
-    parser.add_option('-p', '--port', action='store', dest='port',
-                      default='32400',
-                      help='port to talk to the server on [default %default]')
-    parser.add_option('-c', '--config', action='store', dest='config_file',
-                      default='~/.config/plexpiry.conf')
+    formatter = argparse.ArgumentDefaultsHelpFormatter
+    parser = argparse.ArgumentParser(description='Delete old media from Plex',
+                                     formatter_class=formatter)
+    parser.add_argument('-d', '--debug', action='store_true', dest='debug',
+                        help='turn on debugging')
+    parser.add_argument('-n', '--dry-run', action='store_true', dest='dryrun',
+                        help='simulate run and display what would be removed')
+    parser.add_argument('-s', '--server', action='store', dest='server',
+                        default='localhost',
+                        help='server to talk to')
+    parser.add_argument('-p', '--port', action='store', dest='port',
+                        default='32400', type=int,
+                        help='port to talk to')
+    parser.add_argument('-c', '--config', action='store', dest='config_file',
+                        default='~/.config/plexpiry.conf',
+                        help='Configuration file')
 
-    (options, args) = parser.parse_args()
+    options = parser.parse_args(args)
 
-    return options
+    return vars(options)
 
 
 class Plexpiry:
@@ -287,8 +289,10 @@ class Plexpiry:
         opener = urllib2.build_opener(urllib2.HTTPHandler)
         request = urllib2.Request(url)
         request.get_method = lambda: 'DELETE'
-        if not self.options.dryrun:
+        if not self.options.dryrun:  # pragma: no cover
             url = opener.open(request)
+        self.dbg("Making HTTP call: %s %s" % (request.get_method(),
+                                              request.get_full_url()))
 
     def expire(self):
         """Process all media for being expired."""
@@ -331,7 +335,7 @@ class Plexpiry:
             self.refresh_plex()
 
 
-def main():
+def main():  # pragma: no cover
     try:
         plex = Plexpiry(parse_options())
     except ConfigParser.ParsingError as e:
@@ -340,5 +344,5 @@ def main():
 
     plex.expire()
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()
