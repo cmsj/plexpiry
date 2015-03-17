@@ -36,7 +36,7 @@ def parse_options(args=None):
 
     options = parser.parse_args(args)
 
-    return vars(options)
+    return options
 
 
 class Plexpiry:

@@ -429,7 +429,16 @@ class TestPlexpiry(testtools.TestCase):
                    "port": 123,
                    "config_file": "bar"}
 
-        self.assertEqual(options, plexpiry.parse_options(args))
+        self.assertEqual(options, vars(plexpiry.parse_options(args)))
+
+    def test_parse_options_partial(self):
+        args = ['-s', 'foo']
+        options = {"debug": False,
+                   "dryrun": False,
+                   "server": "foo",
+                   "port": 32400,
+                   "config_file": "~/.config/plexpiry.conf"}
+        self.assertEqual(options, vars(plexpiry.parse_options(args)))
 
     def test_expire(self):
         self.options.dryrun = True
