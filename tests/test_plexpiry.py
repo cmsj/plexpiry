@@ -152,20 +152,9 @@ TEST_TV_EPISODE = 433
 TEST_MOVIE = 1024
 
 
-class FakeOptions():
-    debug = False
-    server = "fakeserver"
-    port = 1234
-    dryrun = False
-    config_file = GOOD_CONFIG_FILE
-
-
-class FakeBadConfigFileOptions():
-    debug = False
-    server = "fakeserver"
-    port = 1234
-    dryrun = False
-    config_file = BAD_CONFIG_FILE
+FAKE_OPTIONS = ["-s", "fakeserver", "-p", "1234", "-c", GOOD_CONFIG_FILE]
+FAKE_BADCONFIGFILE_OPTIONS = ["-s", "fakeserver", "-p", "1234",
+                              "-c", BAD_CONFIG_FILE]
 
 
 class TestPlexpiry(testtools.TestCase):
@@ -220,12 +209,12 @@ class TestPlexpiry(testtools.TestCase):
         self.useFixture(fixtures.MonkeyPatch('urllib2.urlopen', fake_urlopen))
         self.addCleanup(self.cleanUp)
 
-        self.options = FakeOptions()
+        self.options = plexpiry.parse_options(FAKE_OPTIONS)
         self.plexpiry = plexpiry.Plexpiry(self.options)
         self.plexpiry.find_sections()
 
     def cleanUp(self):
-        self.options = FakeOptions()
+        self.options = plexpiry.parse_options(FAKE_OPTIONS)
 
     def test_urlbase(self):
         self.assertEqual("http://fakeserver:1234", self.plexpiry.urlbase)
@@ -279,7 +268,7 @@ class TestPlexpiry(testtools.TestCase):
 
         self.assertRaises(ConfigParser.ParsingError,
                           plexpiry.Plexpiry,
-                          FakeBadConfigFileOptions())
+                          plexpiry.parse_options(FAKE_BADCONFIGFILE_OPTIONS))
 
     def test_empty_config_file(self):
         self.plexpiry = plexpiry.Plexpiry(self.options)
