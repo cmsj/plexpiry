@@ -330,7 +330,7 @@ class Plexpiry:
                                    season["title"],
                                    episode["title"],
                                    result))
-                        self.delete(episode)
+                        self.delete(episode["ratingKey"])
                     else:
                         self.dbg("Skipping: %s:%s:%s" % (show["title"],
                                                          season["title"],
