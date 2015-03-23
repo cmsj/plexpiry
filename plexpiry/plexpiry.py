@@ -54,7 +54,10 @@ class Plexpiry:
     def dbg(self, message):
         """Print a debugging statement."""
         if self.options.debug:
-            print("DEBUG: %s" % message)
+            try:
+                print("DEBUG: %s" % message)
+            except UnicodeEncodeError:
+                print("Sorry, Python sucks at Unicode.")
 
     def err(self, message):
         """Print an error statement."""
