@@ -61,11 +61,17 @@ class Plexpiry:
 
     def err(self, message):
         """Print an error statement."""
-        print("ERROR: %s" % message)
+        try:
+            print("ERROR: %s" % message)
+        except UnicodeEncodeError:
+            print("Sorry, Python sucks at Unicode.")
 
     def info(self, message):
         """Print an info statement."""
-        print("INFO: %s" % message)
+        try:
+            print("INFO: %s" % message)
+        except UnicodeEncodeError:
+            print("Sorry, Python sucks at Unicode.")
 
     def open_config_file(self):
         """Open the config file."""
