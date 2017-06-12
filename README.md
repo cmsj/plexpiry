@@ -1,6 +1,7 @@
 Plexpiry queries a Plex media server to find Movies and/or TV shows that meet
 specified criteria, and deletes them.
 
+```
 Usage: plexpiry.py [options]
 
 Options:
@@ -12,6 +13,7 @@ Options:
   -p PORT, --port=PORT  port to talk to the server on [default 32400]
 
   -c FILE, --config=FILE config file to read
+```
 
 Config file format:
 
